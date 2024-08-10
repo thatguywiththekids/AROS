@@ -17648,20 +17648,9 @@ fi
         *) sdl2_hidd="auto" ;;
     esac
 
-        if test "x-$sdl_hidd" = "x-yes" && test "x-$sdl2_hidd" = "x-yes"; then
-        as_fn_error $? "HIDDs for SDL and SDL2 cannot be built at the same time. Choose one." "$LINENO" 5
-    fi
+        if test "x-$sdl2_hidd" != "x-no"; then
 
-    if test "x-$sdl2_hidd" != "x-no" || test "x-$sdl_hidd" != "x-no"; then
-        want_some_sdl=1
-    else
-        want_some_sdl=
-    fi
-
-    some_sdl_found=
-        if test "x-$sdl2_hidd" != "x-no" && test "x-$sdl_hidd" != "x-yes"; then
-
-        SDL2_VERSION=2.0.20
+                SDL2_VERSION=2.0.20
 
 
 
@@ -18161,14 +18150,15 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
 
         if test "x-$have_sdl2" = "x-yes"; then
                         aros_target_options+="$export_newline""# Enable SDL2 Gfx Driver$export_newline""OPT_HOST_SDL2GFX               := yes$export_newline"
-            aros_host_sdl_cflags=$SDL_CFLAGS
-            aros_host_sdl_libs=$SDL_LIBS
-            some_sdl_found=1
-        fi
+            aros_host_sdl2_cflags=$SDL_CFLAGS
+            aros_host_sdl2_libs=$SDL_LIBS
+        elif test "x-$sdl2_hidd" = "x-yes"; then
+	    	    as_fn_error $? "SDL 2 libs/headers not found" "$LINENO" 5
+	fi
     fi
-    if test "x-$sdl_hidd" != "x-no"; then
-        if test "x-$some_sdl_found" = "x-"; then
-                        SDL_VERSION=1.2.5
+
+        if test "x-$sdl_hidd" != "x-no"; then
+        SDL_VERSION=1.2.5
 
 # Check whether --with-sdl-prefix was given.
 if test ${with_sdl_prefix+y}
@@ -18436,21 +18426,12 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
   rm -f conf.sdltest
 
 
-            if test "x-$have_sdl" = "x-yes"; then
-                                aros_target_options+="$export_newline""# Enable SDL Gfx Driver$export_newline""OPT_HOST_SDLGFX               := yes$export_newline"
-                aros_host_sdl_cflags=$SDL_CFLAGS
-                aros_host_sdl_libs=$SDL_LIBS
-                some_sdl_found=1
-            fi
-        fi
-    fi
-    if test "x-$want_some_sdl" != "x-" && test "x-$some_sdl_found" = "x-"; then
-        if test "x-$sdl_hidd" = "x-yes"; then
-            as_fn_error $? "SDL 1.2 libs/headers not found" "$LINENO" 5
-        elif test "x-$sdl_hidd" = "x-no"; then
-            as_fn_error $? "SDL 2 libs/headers not found" "$LINENO" 5
-        else
-            as_fn_error $? "SDL libs/headers not found" "$LINENO" 5
+        if test "x-$have_sdl" = "x-yes"; then
+                        aros_target_options+="$export_newline""# Enable SDL Gfx Driver$export_newline""OPT_HOST_SDLGFX               := yes$export_newline"
+            aros_host_sdl_cflags=$SDL_CFLAGS
+            aros_host_sdl_libs=$SDL_LIBS
+        elif test "x-$sdl_hidd" = "x-yes"; then
+	    	    as_fn_error $? "SDL 1.2 libs/headers not found" "$LINENO" 5
 	fi
     fi
 

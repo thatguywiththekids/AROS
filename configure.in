@@ -3350,54 +3350,37 @@ if test "x-$aros_flavour" = "x-emulation" -o "x-$aros_flavour" = "x-emulcompat" 
         *) sdl2_hidd="auto" ;;
     esac
 
-    dnl Avoid complications, don't build both SDL HIDDs
-    if test "x-$sdl_hidd" = "x-yes" && test "x-$sdl2_hidd" = "x-yes"; then
-        AC_MSG_ERROR([HIDDs for SDL and SDL2 cannot be built at the same time. Choose one.])
-    fi
+    dnl Check for SDL 2
+    if test "x-$sdl2_hidd" != "x-no"; then
 
-    if test "x-$sdl2_hidd" != "x-no" || test "x-$sdl_hidd" != "x-no"; then
-        want_some_sdl=1
-    else
-        want_some_sdl=
-    fi
-
-    some_sdl_found=
-    dnl Prefer SDL2 unless user said no to SDL2 or yes to SDL
-    if test "x-$sdl2_hidd" != "x-no" && test "x-$sdl_hidd" != "x-yes"; then
-
+        dnl 2.0.20 is what Ubuntu 22 uses. X11 is available on older distros.
         SDL2_VERSION=2.0.20
         AM_PATH_SDL2($SDL2_VERSION, [have_sdl2="yes"], [have_sdl2="no"])
 
         if test "x-$have_sdl2" = "x-yes"; then
             dnl Found SDL2, enable SDL2 build
             aros_target_options+="$export_newline""# Enable SDL2 Gfx Driver$export_newline""OPT_HOST_SDL2GFX               := yes$export_newline"
+            aros_host_sdl2_cflags=$SDL_CFLAGS
+            aros_host_sdl2_libs=$SDL_LIBS
+        elif test "x-$sdl2_hidd" = "x-yes"; then
+	    dnl We really wanted SDL 2, so this is a failure
+	    AC_MSG_ERROR([SDL 2 libs/headers not found])
+	fi
+    fi
+
+    dnl Check for SDL 1.2
+    if test "x-$sdl_hidd" != "x-no"; then
+        SDL_VERSION=1.2.5
+        AM_PATH_SDL($SDL_VERSION, [have_sdl="yes"], [have_sdl="no"])
+
+        if test "x-$have_sdl" = "x-yes"; then
+            dnl found SDL 1.2, enable SDL 1.2 build
+            aros_target_options+="$export_newline""# Enable SDL Gfx Driver$export_newline""OPT_HOST_SDLGFX               := yes$export_newline"
             aros_host_sdl_cflags=$SDL_CFLAGS
             aros_host_sdl_libs=$SDL_LIBS
-            some_sdl_found=1
-        fi
-    fi
-    if test "x-$sdl_hidd" != "x-no"; then
-        if test "x-$some_sdl_found" = "x-"; then
-            dnl SDL2 was not found or not preferred, and SDL is accepted.
-            SDL_VERSION=1.2.5
-            AM_PATH_SDL($SDL_VERSION, [have_sdl="yes"], [have_sdl="no"])
-
-            if test "x-$have_sdl" = "x-yes"; then
-                dnl found SDL, enable SDL build
-                aros_target_options+="$export_newline""# Enable SDL Gfx Driver$export_newline""OPT_HOST_SDLGFX               := yes$export_newline"
-                aros_host_sdl_cflags=$SDL_CFLAGS
-                aros_host_sdl_libs=$SDL_LIBS
-                some_sdl_found=1
-            fi
-        fi
-    fi
-    if test "x-$want_some_sdl" != "x-" && test "x-$some_sdl_found" = "x-"; then
-        if test "x-$sdl_hidd" = "x-yes"; then
-            AC_MSG_ERROR([SDL 1.2 libs/headers not found])
-        elif test "x-$sdl_hidd" = "x-no"; then
-            AC_MSG_ERROR([SDL 2 libs/headers not found])
-        else
-            AC_MSG_ERROR([SDL libs/headers not found])
+        elif test "x-$sdl_hidd" = "x-yes"; then
+	    dnl We really wanted SDL 1.2, so this is a failure
+	    AC_MSG_ERROR([SDL 1.2 libs/headers not found])
 	fi
     fi
 
