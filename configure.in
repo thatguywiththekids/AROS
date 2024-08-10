@@ -3352,8 +3352,9 @@ if test "x-$aros_flavour" = "x-emulation" -o "x-$aros_flavour" = "x-emulcompat" 
 
     dnl Check for SDL 2
     if test "x-$sdl2_hidd" != "x-no"; then
-
-        dnl 2.0.20 is what Ubuntu 22 uses. X11 is available on older distros.
+        dnl 2.0.20 is what Ubuntu 22 uses.
+        dnl Older Linux hosts and BSD hosts: The X11 driver is a better choice.
+        dnl WSL hosts: Can upgrade to Ubuntu 22 if older, otherwise situation is as before SDL2 hidd was introduced.
         SDL2_VERSION=2.0.20
         AM_PATH_SDL2($SDL2_VERSION, [have_sdl2="yes"], [have_sdl2="no"])
 

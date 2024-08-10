@@ -17649,8 +17649,7 @@ fi
     esac
 
         if test "x-$sdl2_hidd" != "x-no"; then
-
-                SDL2_VERSION=2.0.20
+                                SDL2_VERSION=2.0.20
 
 
 
