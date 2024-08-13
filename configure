@@ -652,6 +652,8 @@ aros_config_unittests
 mmake_ignore_dirs
 config_prefs_set
 aros_usb30_code
+aros_host_sdl2_libs
+aros_host_sdl2_cflags
 aros_host_sdl_libs
 aros_host_sdl_cflags
 aros_host_x11_ldflags
@@ -18149,8 +18151,13 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
 
         if test "x-$have_sdl2" = "x-yes"; then
                         aros_target_options+="$export_newline""# Enable SDL2 Gfx Driver$export_newline""OPT_HOST_SDL2GFX               := yes$export_newline"
-            aros_host_sdl2_cflags=$SDL_CFLAGS
             aros_host_sdl2_libs=$SDL_LIBS
+            # SDL2 has some target-specific headers that the compiler needs to find.
+            extra_sdl2_headers=/usr/include/${target_cpu}-${target_os}
+            if test $target_os = linux; then
+                extra_sdl2_headers+=-gnu
+            fi
+            aros_host_sdl2_cflags="$SDL_CFLAGS -idirafter $extra_sdl2_headers"
         elif test "x-$sdl2_hidd" = "x-yes"; then
 	    	    as_fn_error $? "SDL 2 libs/headers not found" "$LINENO" 5
 	fi
@@ -18812,6 +18819,8 @@ aros_kernel_ranlib=$aros_kernel_ranlib
 
 
 #SDL related
+
+
 
 
 

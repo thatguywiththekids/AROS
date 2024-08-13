@@ -3361,8 +3361,13 @@ if test "x-$aros_flavour" = "x-emulation" -o "x-$aros_flavour" = "x-emulcompat" 
         if test "x-$have_sdl2" = "x-yes"; then
             dnl Found SDL2, enable SDL2 build
             aros_target_options+="$export_newline""# Enable SDL2 Gfx Driver$export_newline""OPT_HOST_SDL2GFX               := yes$export_newline"
-            aros_host_sdl2_cflags=$SDL_CFLAGS
             aros_host_sdl2_libs=$SDL_LIBS
+            # SDL2 has some target-specific headers that the compiler needs to find.
+            extra_sdl2_headers=/usr/include/${target_cpu}-${target_os}
+            if test $target_os = linux; then
+                extra_sdl2_headers+=-gnu
+            fi
+            aros_host_sdl2_cflags="$SDL_CFLAGS -idirafter $extra_sdl2_headers"
         elif test "x-$sdl2_hidd" = "x-yes"; then
 	    dnl We really wanted SDL 2, so this is a failure
 	    AC_MSG_ERROR([SDL 2 libs/headers not found])
@@ -3753,6 +3758,8 @@ AC_SUBST(aros_host_x11_ldflags)
 #SDL related
 AC_SUBST(aros_host_sdl_cflags)
 AC_SUBST(aros_host_sdl_libs)
+AC_SUBST(aros_host_sdl2_cflags)
+AC_SUBST(aros_host_sdl2_libs)
 
 # USB3.0 code
 AC_SUBST(aros_usb30_code)
