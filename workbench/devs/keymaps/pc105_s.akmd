@@ -39,7 +39,7 @@ KCF_SHIFT|KCF_ALT                       # 1C
 KCF_SHIFT|KCF_ALT                       # 1D
 KCF_SHIFT|KCF_ALT                       # 1E
 KCF_SHIFT|KCF_ALT                       # 1F
-KC_VANILLA                              # 20 a
+KCF_DEAD|KC_VANILLA                     # 20 a
 KC_VANILLA                              # 21 s
 KC_VANILLA                              # 22 d
 KC_VANILLA                              # 23 f
@@ -61,7 +61,7 @@ KC_VANILLA                              # 32 x
 KC_VANILLA                              # 33 c
 KC_VANILLA                              # 34 v
 KC_VANILLA                              # 35 b
-KC_VANILLA                              # 36 n
+KCF_DEAD|KC_VANILLA                     # 36 n
 KC_VANILLA                              # 37 m
 KCF_SHIFT|KCF_ALT                       # 38
 KCF_SHIFT|KCF_ALT                       # 39
@@ -74,7 +74,7 @@ KC_NOQUAL                               # 3F
 ## end lokeymaptypes
 
 ## begin hikeymaptypes
-KCF_DEAD|KC_NOQUAL                      # 40 SPACE
+KCF_DEAD|KCF_ALT                        # 40 SPACE
 KC_NOQUAL                               # 41 BACKSPACE
 KCF_STRING|KCF_SHIFT                    # 42 TAB
 KC_NOQUAL                               # 43 ENTER
@@ -140,44 +140,70 @@ id: KEY0C_descr
 
 ## begin deadkey
 id: KEY12_descr
-1, 0x6,
-1, 0xC,
+1, 0x10,
+1, 0x16,
 0, 0xA4,
+0, 0,
+0, 0x5,
+0, 0,
+0, 0,
+0, 0,
 'e', 'é', 'è', 'ë', 'ê', 0,
 'E', 'É', 'È', 'Ë', 'Ê', 0
 ## end deadkey
 
 ## begin deadkey
 id: KEY15_descr
-1, 0x6,
-1, 0xC,
+1, 0x10,
+1, 0x16,
 0, 0xA5,
+0, 0,
+0, 0x19,
+0, 0,
+0, 0,
+0, 0,
 'y', 'ý', 0, 'ÿ', 0, 0,
 'Y', 'Ý', 0, 0, 0, 0
 ## end deadkey
 
 ## begin deadkey
 id: KEY16_descr
-1, 0x4,
-1, 0xA,
+1, 0x10,
+1, 0x16,
+0, 'ú',
+0, 'Ú',
+0, 0x15,
+0, 0,
+0, 0,
+0, 0,
 'u', 'ú', 'ù', 'ü', 'û', 0,
 'U', 'Ú', 'Ù', 'Ü', 'Û', 0
 ## end deadkey
 
 ## begin deadkey
 id: KEY17_descr
-1, 0x4,
-1, 0xA,
+1, 0x10,
+1, 0x16,
+0, 'í',
+0, 'Í',
+0, 0x9,
+0, 0,
+0, 0,
+0, 0,
 'i', 'í', 'ì', 'ï', 'î', 0,
 'I', 'Í', 'Ì', 'Ï', 'Î', 0
 ## end deadkey
 
 ## begin deadkey
 id: KEY18_descr
-1, 0x8,
-1, 0xE,
-0, 0xF8,
-0, 0xD8,
+1, 0x10,
+1, 0x16,
+0, 'ó',
+0, 'Ó',
+0, 0xF,
+0, 0,
+0, 0,
+0, 0,
 'o', 'ó', 'ò', 'ö', 'ô', 'õ',
 'O', 'Ó', 'Ò', 'Ö', 'Ô', 'Õ'
 ## end deadkey
@@ -190,8 +216,37 @@ id: KEY1B_descr
 ## end deadkey
 
 ## begin deadkey
+id: KEY20_descr
+1, 0x10,
+1, 0x16,
+0, 'á',
+0, 'Á',
+0, 0x1,
+0, 0,
+0, 0,
+0, 0,
+'a', 'á', 'à', 'ä', 'â', 'ã',
+'A', 'Á', 'À', 'Ä', 'Â', 'Ã'
+## end deadkey
+
+## begin deadkey
+id: KEY36_descr
+1, 0x10,
+1, 0x16,
+0, '-',
+0, 0xAF,
+0, 0xE,
+0, 0,
+0, 0,
+0, 0,
+'n', 0, 0, 0, 0, 'ñ',
+'N', 0, 0, 0, 0, 'Ñ'
+## end deadkey
+
+## begin deadkey
 id: space_descr
-1, 0x2,
+1, 0x4,
+0, 0xA0,
 ' ', '´', '`', 0xA8, '^', '~'
 ## end deadkey
 
@@ -444,7 +499,7 @@ id:KEY1B_descr
 '1', '1', '1', '1'
 '2', '2', '2', '2'
 '3', '3', '3', '3'
-0xC5,0xE5,'A' ,'a'
+id:KEY20_descr
 0x8A,0x9A,'S' ,'s'
 0xD0,0xF0,'D' ,'d'
 0xDE,0xFE,'F' ,'f'
@@ -466,7 +521,7 @@ id:KEY1B_descr
 0xC7,0xE7,'C' ,'c'
 0x8B,0xAB,'V' ,'v'
 0x95,0xB7,'B' ,'b'
-0x9B,0xBB,'N' ,'n'
+id:KEY36_descr
 0,   0xB5,'M' ,'m'
 0xB8,0,   ';' ,','
 0xF7,0x85,':' ,'.'
