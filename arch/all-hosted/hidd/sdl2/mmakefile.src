@@ -1,0 +1,21 @@
+include $(SRCDIR)/config/aros.cfg
+
+#MM- hidd-sdl2gfx-yes : kernel-hidd-sdl2
+
+FILES  := \
+    startup \
+    sdl_hostlib \
+    sdl_init \
+    event \
+    keymap \
+    sdlgfx_hiddclass \
+    sdlgfx_bitmapclass \
+    sdl_mouseclass \
+    sdl_kbdclass
+
+EXEDIR := $(AROSDIR)/Storage/Monitors
+
+%build_prog mmake=kernel-hidd-sdl2 \
+  progname=SDL2 targetdir=$(EXEDIR) \
+  files=$(FILES) cflags="$(CFLAGS) $(HOST_SDL2_CFLAGS)" \
+  uselibs="hiddstubs"

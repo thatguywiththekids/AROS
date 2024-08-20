@@ -40,6 +40,7 @@ $(AROSARCHDIR):
 #MM	kernel-task-kobj			\
 #MM     hidd-x11gfx-$(OPT_HOST_X11GFX)	        \
 #MM     hidd-sdlgfx-$(OPT_HOST_SDLGFX)	        \
+#MM     hidd-sdl2gfx-$(OPT_HOST_SDLGFX)	        \
 #MM     hidd-androidgfx-$(OPT_HOST_ANDROIDGFX)     \
 #MM     kernel-fs-emul                          \
 #MM	kernel-unixio     			\
