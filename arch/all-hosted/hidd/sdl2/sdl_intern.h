@@ -105,12 +105,8 @@ struct sdlhidd
     OOP_Object              *mousehidd;
     OOP_Object              *kbdhidd;
 
-    // This array maps SDL keycodes up to ?? to AROS keys.
-    UBYTE                   low_keycode[??];
-
-    // This array maps keycodes > 0x40000000 with the 31st bit set to zero
-    // to AROS keys.
-    UBYTE                   high_keycode[SDL_NUM_SCANCODES];
+    // This array maps SDL scancode to AROS key
+    UBYTE                   scancode_to_aroskey[SDL_NUM_SCANCODES];
 
     BOOL                    use_hwsurface;
     BOOL                    use_fullscreen;
