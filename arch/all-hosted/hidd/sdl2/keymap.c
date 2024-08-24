@@ -54,7 +54,7 @@ static const struct keymap keymap[] = {
     { SDL_SCANCODE_SEMICOLON, RAWKEY_SEMICOLON },
     { SDL_SCANCODE_EQUALS,    RAWKEY_EQUAL     },
     { SDL_SCANCODE_BACKSLASH, RAWKEY_BACKSLASH },
-    { SDL_SCANCODE_BACKQUOTE, RAWKEY_TILDE     },
+    { SDL_SCANCODE_GRAVE,     RAWKEY_TILDE     },
     { SDL_SCANCODE_A,         RAWKEY_A         },
     { SDL_SCANCODE_B,         RAWKEY_B         },
     { SDL_SCANCODE_C,         RAWKEY_C         },
@@ -82,16 +82,16 @@ static const struct keymap keymap[] = {
     { SDL_SCANCODE_Y,         RAWKEY_Y         },
     { SDL_SCANCODE_Z,         RAWKEY_Z         },
     { SDL_SCANCODE_DELETE,    RAWKEY_DELETE    },
-    { SDL_SCANCODE_KP0,       RAWKEY_KP_0      },
-    { SDL_SCANCODE_KP1,       RAWKEY_KP_1      },
-    { SDL_SCANCODE_KP2,       RAWKEY_KP_2      },
-    { SDL_SCANCODE_KP3,       RAWKEY_KP_3      },
-    { SDL_SCANCODE_KP4,       RAWKEY_KP_4      },
-    { SDL_SCANCODE_KP5,       RAWKEY_KP_5      },
-    { SDL_SCANCODE_KP6,       RAWKEY_KP_6      },
-    { SDL_SCANCODE_KP7,       RAWKEY_KP_7      },
-    { SDL_SCANCODE_KP8,       RAWKEY_KP_8      },
-    { SDL_SCANCODE_KP9,       RAWKEY_KP_9      },
+    { SDL_SCANCODE_KP_0,       RAWKEY_KP_0      },
+    { SDL_SCANCODE_KP_1,       RAWKEY_KP_1      },
+    { SDL_SCANCODE_KP_2,       RAWKEY_KP_2      },
+    { SDL_SCANCODE_KP_3,       RAWKEY_KP_3      },
+    { SDL_SCANCODE_KP_4,       RAWKEY_KP_4      },
+    { SDL_SCANCODE_KP_5,       RAWKEY_KP_5      },
+    { SDL_SCANCODE_KP_6,       RAWKEY_KP_6      },
+    { SDL_SCANCODE_KP_7,       RAWKEY_KP_7      },
+    { SDL_SCANCODE_KP_8,       RAWKEY_KP_8      },
+    { SDL_SCANCODE_KP_9,       RAWKEY_KP_9      },
     { SDL_SCANCODE_KP_PERIOD, RAWKEY_KP_DECIMAL},
     { SDL_SCANCODE_KP_PLUS,   RAWKEY_KP_PLUS   },
     { SDL_SCANCODE_KP_ENTER,  RAWKEY_KP_ENTER  },
@@ -123,12 +123,10 @@ static const struct keymap keymap[] = {
     { SDL_SCANCODE_LCTRL,     RAWKEY_LCONTROL  },
     { SDL_SCANCODE_RALT,      RAWKEY_RALT      },
     { SDL_SCANCODE_LALT,      RAWKEY_LALT      },
-    { SDL_SCANCODE_RMETA,     RAWKEY_RAMIGA    },
-    { SDL_SCANCODE_LMETA,     RAWKEY_LAMIGA    },
-    { SDL_SCANCODE_LSUPER,    RAWKEY_LAMIGA    },
-    { SDL_SCANCODE_RSUPER,    RAWKEY_RAMIGA    },
+    { SDL_SCANCODE_RGUI,      RAWKEY_RAMIGA    },
+    { SDL_SCANCODE_LGUI,      RAWKEY_LAMIGA    },
     { SDL_SCANCODE_HELP,      RAWKEY_HELP      },
-    { 0xff,           0xff             }
+    { 0xffff           ,      0xff             } // Sentinel to avoid overrun
 };
 
 void sdl_keymap_init(LIBBASETYPEPTR LIBBASE) {
@@ -137,9 +135,9 @@ void sdl_keymap_init(LIBBASETYPEPTR LIBBASE) {
 
     D(bug("[sdl] sdl_keymap_init\n"));
 
-    for (i = 0; i < SDL_SCANCODE_LAST; i++)
-        LIBBASE->keycode[i] = 0xff;
+    for (i = 0; i < SDL_NUM_SCANCODES; i++)
+        LIBBASE->scancode_to_aroskey[i] = 0xff;
 
-    for (pair = keymap; pair->sdl != 0xff && pair->aros != 0xff; pair++)
-        LIBBASE->keycode[pair->sdl] = pair->aros;
+    for (pair = keymap; pair->sdl != 0xffff && pair->aros != 0xff; pair++)
+        LIBBASE->scancode_to_aroskey[pair->sdl] = pair->aros;
 }
