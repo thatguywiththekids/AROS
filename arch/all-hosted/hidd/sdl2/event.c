@@ -69,17 +69,22 @@ VOID sdl_event_task(struct Task *creator, ULONG sync, LIBBASETYPEPTR LIBBASE) {
         Wait(SIGBREAKF_CTRL_D);
 
         SV(SDL_PumpEvents);
-        if ((nevents = S(SDL_PeepEvents, e, MAX_EVENTS, SDL_GETEVENT, SDL_MOUSEEVENTMASK|SDL_KEYEVENTMASK|SDL_ACTIVEEVENTMASK)) > 0) {
+        if ((nevents = S(SDL_PeepEvents, e, MAX_EVENTS, SDL_GETEVENT, SDL_WINDOWEVENT, SDL_MOUSEWHEEL)) > 0) {
             D(bug("[sdl] %d events pending\n", nevents));
 
             for (i = 0; i < nevents; i++) {
                 switch (e[i].type) {
-                    case SDL_ACTIVEEVENT:
-                        if (e[i].active.state & SDL_APPINPUTFOCUS) {
-                            active = e[i].active.gain;
-                            D(bug("[sdl] Window active: %u\n", active));
-                            if (active && LIBBASE->cb)
+                    case SDL_WINDOWEVENT:
+                        if (e[i].window.event & SDL_WINDOWEVENT_FOCUS_GAINED) {
+                            active = 1;
+                            D(bug("[sdl] Window got input focus\n"));
+                            if (LIBBASE->cb) {
                                 LIBBASE->cb(LIBBASE->cbdata, NULL);
+                            }
+                        }
+                        else if (e[i].window.event & SDL_WINDOWEVENT_FOCUS_LOST) {
+                            active = 0;
+                            D(bug("[sdl] Window lost input focus\n"));
                         }
                         break;
                     case SDL_MOUSEMOTION:

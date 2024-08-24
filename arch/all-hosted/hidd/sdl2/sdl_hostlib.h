@@ -40,7 +40,7 @@ struct sdl_funcs
     void (*SDL_WM_SetIcon) (SDL_Surface *icon, Uint8 *mask);
     int (*SDL_ShowCursor) (int toggle);
     void (*SDL_PumpEvents) (void);
-    int (*SDL_PeepEvents) (SDL_Event *events, int numevents, SDL_eventaction action, Uint32 mask);
+    int (*SDL_PeepEvents) (SDL_Event *events, int numevents, SDL_eventaction action, Uint32 minType, Uint32 maxType);
     const SDL_version * (*SDL_Linked_Version) (void);
     int (*SDL_Init) (Uint32 flags);
     void (*SDL_Quit) (void);
