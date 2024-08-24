@@ -24,7 +24,9 @@ struct sdl_funcs
     char * (*SDL_GetError) (void);
     char * (*SDL_VideoDriverName) (char *namebuf, int maxlen);
     SDL_Surface * (*SDL_GetVideoSurface) (void);
-    // SDL_GetVideoInfo is no more. This comment is all that is left.
+    int (*SDL_GetCurrentDisplayMode) (int displayIndex, SDL_DisplayMode *mode);
+    SDL_PixelFormat * (*SDL_AllocFormat) (Uint32 format);
+    void (*SDL_FreeFormat) (SDL_PixelFormat *);
     SDL_Rect ** (*SDL_ListModes) (SDL_PixelFormat *format, Uint32 flags);
     SDL_Surface * (*SDL_SetVideoMode) (int width, int height, int bpp, Uint32 flags);
     void (*SDL_UpdateRect) (SDL_Surface *screen, Sint32 x, Sint32 y, Uint32 w, Uint32 h);

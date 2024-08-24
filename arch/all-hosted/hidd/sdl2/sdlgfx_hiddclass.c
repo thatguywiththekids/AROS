@@ -50,7 +50,7 @@ static const SDL_Rect *default_modes[] = {
 };
 
 OOP_Object *SDLGfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *msg) {
-    const SDL_VideoInfo *info;
+    SDL_DisplayMode display_mode;
     const SDL_PixelFormat *pixfmt;
 #if DEBUG
     char driver[128] = "";
@@ -58,7 +58,7 @@ OOP_Object *SDLGfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *ms
     Uint32 surftype;
     const SDL_Rect **modes;
     struct TagItem *pftags = NULL;
-    int nmodes, i;
+    int nmodes, i, error;
     APTR tagpool;
     struct TagItem **synctags, *modetags, *msgtags;
     struct pRoot_New supermsg;
@@ -67,11 +67,13 @@ OOP_Object *SDLGfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *ms
     S(SDL_VideoDriverName, driver, sizeof(driver));
     kprintf("sdlgfx: using %s driver\n", driver);
 #endif
-    info = SP(SDL_GetVideoInfo);
-    pixfmt = info->vfmt;
-    D(bug("[sdl] window manager: %savailable\n", info->wm_available ? "" : "not "));
-    D(bug("[sdl] hardware surfaces: %savailable\n", info->hw_available ? "" : "not "));
-
+    error = S(SDL_GetCurrentDisplayMode, 0, &display_mode);
+    if (error) {
+        bug("[sdl] Failed to get the current display mode.\n");
+        return NULL;
+    }
+    pixfmt = SP(SDL_AllocFormat, display_mode.format);
+    // FIXME: What to do here as we have no renderer yet? How does it matter?
     LIBBASE->use_hwsurface = info->hw_available ? TRUE : FALSE;
     surftype = LIBBASE->use_hwsurface ? SDL_HWSURFACE : SDL_SWSURFACE;
 
@@ -273,8 +275,9 @@ OOP_Object *SDLGfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *ms
     modetags[1+i].ti_Tag = TAG_DONE;
 
     msgtags = TAGLIST(
+        aHidd_Gfx_FrameBufferType, (IPTR)vHidd_FrameBuffer_None,
         aHidd_Gfx_ModeTags, (IPTR)modetags,
-        aHidd_Name        , (IPTR)"SDL",
+        aHidd_Name        , (IPTR)"SDL2",
         aHidd_HardwareName, (IPTR)"Simple DirectMedia Layer Gfx Host",
         aHidd_ProducerName, (IPTR)"SDL development team (http://libsdl.org/credits.php)",
         TAG_MORE          , (IPTR)msg->attrList
@@ -288,6 +291,7 @@ OOP_Object *SDLGfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *ms
     o = (OOP_Object *) OOP_DoSuperMethod(cl, o, (OOP_Msg) &supermsg);
 
     DeletePool(tagpool);
+    SV(SDL_FreeFormat, pixfmt);
 
     if (o == NULL) {
         D(bug("[sdl] supermethod failed, bailing out\n"));
