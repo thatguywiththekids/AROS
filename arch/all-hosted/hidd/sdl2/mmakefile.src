@@ -6,8 +6,8 @@ FILES  := \
     startup \
     sdl_hostlib \
     sdl_init \
-    keymap \
     event \
+    keymap \
     sdlgfx_hiddclass \
     sdlgfx_bitmapclass \
     sdl_mouseclass \
