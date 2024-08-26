@@ -32,13 +32,7 @@ int sdl_hidd_init(LIBBASETYPEPTR LIBBASE) {
         kprintf("         You may experience problems\n");
     }
 
-    /* start sdl. we don't catch any signals with a debug build as it plays
-     * havoc with the debugger */
-#if DEBUG
-    ret = S(SDL_Init, SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE);
-#else
     ret = S(SDL_Init, SDL_INIT_VIDEO);
-#endif
 
     if (ret != 0) {
         D(bug("[sdl] couldn't initialise SDL\n"));
