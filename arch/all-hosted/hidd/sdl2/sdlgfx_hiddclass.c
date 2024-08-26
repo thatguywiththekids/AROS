@@ -32,26 +32,10 @@
 
 #define LIBBASE (&xsd)
 
-static const SDL_Rect mode_1600_1200 = { .w = 1600, .h = 1200 };
-static const SDL_Rect mode_1280_1024 = { .w = 1280, .h = 1024 };
-static const SDL_Rect mode_1280_960  = { .w = 1280, .h = 960  };
-static const SDL_Rect mode_1152_864  = { .w = 1152, .h = 864  };
-static const SDL_Rect mode_1024_768  = { .w = 1024, .h = 768  };
-static const SDL_Rect mode_800_600   = { .w = 800,  .h = 600  };
 
-static const SDL_Rect *default_modes[] = {
-    &mode_1600_1200,
-    &mode_1280_1024,
-    &mode_1280_960,
-    &mode_1152_864,
-    &mode_1024_768,
-    &mode_800_600,
-    NULL
-};
-
-OOP_Object *SDLGfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *msg) {
-    SDL_DisplayMode display_mode;
-    const SDL_PixelFormat *pixfmt;
+OOP_Object *SDL2Gfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *msg) {
+    SDL_DisplayMode current_mode;
+    SDL_PixelFormat *pixfmt;
 #if DEBUG
     char driver[128] = "";
 #endif
@@ -67,15 +51,12 @@ OOP_Object *SDLGfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *ms
     S(SDL_VideoDriverName, driver, sizeof(driver));
     kprintf("sdlgfx: using %s driver\n", driver);
 #endif
-    error = S(SDL_GetCurrentDisplayMode, 0, &display_mode);
+    error = S(SDL_GetCurrentDisplayMode, 0, &current_mode);
     if (error) {
         bug("[sdl] Failed to get the current display mode.\n");
         return NULL;
     }
-    pixfmt = SP(SDL_AllocFormat, display_mode.format);
-    // FIXME: What to do here as we have no renderer yet? How does it matter?
-    LIBBASE->use_hwsurface = info->hw_available ? TRUE : FALSE;
-    surftype = LIBBASE->use_hwsurface ? SDL_HWSURFACE : SDL_SWSURFACE;
+    pixfmt = SP(SDL_AllocFormat, current_mode.format);
 
     D(bug("[sdl] colour model: %s\n", pixfmt->palette == NULL ? "truecolour" : "palette"));
     if (pixfmt->palette == NULL) {
@@ -219,19 +200,23 @@ OOP_Object *SDLGfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *ms
         );
     }
 
-    modes = SP(SDL_ListModes, NULL, surftype | LIBBASE->use_fullscreen ? SDL_FULLSCREEN : 0);
-    D(bug("[sdl] available modes:"));
-    if (modes == NULL) {
-        D(bug(" none\n"));
-        nmodes = 0;
-    }
-    else {
-        if (modes == (const SDL_Rect **) -1) {
-            D(bug(" (default)"));
-            modes = default_modes;
+    nmodes = S(SDL_GetNumDisplayModes, 0);
+    if (nmodes < 1) {
+        bug("[sdl] no available modes, will not continue\n");
+        SV(SDL_FreeFormat, pixfmt);
+        return NULL;
+    } else {
+        D(bug("[sdl] available modes:"));
+    
+        for (int i = 0; i < nmodes; ++i) {
+            SDL_DisplayMode mode;
+            if (SDL_GetDisplayMode(0, i, &mode) == 0) {
+                D(bug(" %dx%d", mode.w, mode.h));
+            } else {
+                bug(" error retrieving mode %d\n", i);
+            }
         }
-        for (nmodes = 0; modes[nmodes] != NULL && modes[nmodes]->w != 0; nmodes++)
-            D(bug(" %dx%d", modes[nmodes]->w, modes[nmodes]->h));
+
         D(bug("\n"));
     }
 
@@ -243,7 +228,7 @@ OOP_Object *SDLGfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *ms
 
     for (i = 0; i < nmodes; i++) {
         /* remove modes larger than the current screen res */
-        if (modes[i]->w > info->current_w || modes[i]->h > info->current_h) {
+        if (modes[i]->w > current_mode.w || modes[i]->h > current_mode.h) {
             synctags[i] = NULL;
             continue;
         }
@@ -301,10 +286,10 @@ OOP_Object *SDLGfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *ms
     return (OOP_Object *) o;
 }
 
-VOID SDLGfx__Root__Dispose(OOP_Class *cl, OOP_Object *o, OOP_Msg msg) {
+VOID SDL2Gfx__Root__Dispose(OOP_Class *cl, OOP_Object *o, OOP_Msg msg) {
     SDL_Surface *s;
 
-    D(bug("[sdl] SDLGfx::Dispose\n"));
+    D(bug("[sdl] SDL2Gfx::Dispose\n"));
     
     s = SP(SDL_GetVideoSurface);
     if (s != NULL) {
@@ -317,7 +302,7 @@ VOID SDLGfx__Root__Dispose(OOP_Class *cl, OOP_Object *o, OOP_Msg msg) {
     return;
 }
 
-VOID SDLGfx__Root__Get(OOP_Class *cl, OOP_Object *o, struct pRoot_Get *msg)
+VOID SDL2Gfx__Root__Get(OOP_Class *cl, OOP_Object *o, struct pRoot_Get *msg)
 {
     ULONG            idx;
 
@@ -337,7 +322,7 @@ VOID SDLGfx__Root__Get(OOP_Class *cl, OOP_Object *o, struct pRoot_Get *msg)
     OOP_DoSuperMethod(cl, o, (OOP_Msg)msg);
 }
 
-VOID SDLGfx__Root__Set(OOP_Class *cl, OOP_Object *obj, struct pRoot_Set *msg)
+VOID SDL2Gfx__Root__Set(OOP_Class *cl, OOP_Object *obj, struct pRoot_Set *msg)
 {
     struct TagItem  *tag, *tstate;
     ULONG           idx;
@@ -361,7 +346,7 @@ VOID SDLGfx__Root__Set(OOP_Class *cl, OOP_Object *obj, struct pRoot_Set *msg)
     OOP_DoSuperMethod(cl, obj, (OOP_Msg)msg);
 }
 
-OOP_Object *SDLGfx__Hidd_Gfx__CreateObject(OOP_Class *cl, OOP_Object *o, struct pHidd_Gfx_CreateObject *msg) {
+OOP_Object *SDL2Gfx__Hidd_Gfx__CreateObject(OOP_Class *cl, OOP_Object *o, struct pHidd_Gfx_CreateObject *msg) {
     OOP_Object      *object = NULL;
 
     if (msg->cl == LIBBASE->basebm)
@@ -370,7 +355,7 @@ OOP_Object *SDLGfx__Hidd_Gfx__CreateObject(OOP_Class *cl, OOP_Object *o, struct 
         struct pHidd_Gfx_CreateObject supermsg;
         struct gfxdata *data = OOP_INST_DATA(cl, o);
 
-        D(bug("[sdl] SDLGfx::CreateObject, UtilityBase is 0x%p\n", UtilityBase));
+        D(bug("[sdl] SDL2Gfx::CreateObject, UtilityBase is 0x%p\n", UtilityBase));
 
         if (GetTagData(aHidd_BitMap_ModeID, vHidd_ModeID_Invalid, msg->attrList) != vHidd_ModeID_Invalid) {
             D(bug("[sdl] bitmap with valid mode, we can handle it\n"));
@@ -401,12 +386,12 @@ OOP_Object *SDLGfx__Hidd_Gfx__CreateObject(OOP_Class *cl, OOP_Object *o, struct 
     return object;
 }
 
-VOID SDLGfx__Hidd_Gfx__CopyBox(OOP_Class *cl, OOP_Object *o, struct pHidd_Gfx_CopyBox *msg) {
+VOID SDL2Gfx__Hidd_Gfx__CopyBox(OOP_Class *cl, OOP_Object *o, struct pHidd_Gfx_CopyBox *msg) {
     struct SDL_Surface *src = NULL;
     struct SDL_Surface *dest = NULL;
     struct SDL_Rect srect, drect;
 
-    D(bug("[sdl] SDLGfx::CopyBox\n"));
+    D(bug("[sdl] SDL2Gfx::CopyBox\n"));
 
     OOP_GetAttr(msg->src,  aHidd_SDLBitMap_Surface, (IPTR *)&src);
     OOP_GetAttr(msg->dest, aHidd_SDLBitMap_Surface, (IPTR *)&dest);
@@ -434,7 +419,7 @@ VOID SDLGfx__Hidd_Gfx__CopyBox(OOP_Class *cl, OOP_Object *o, struct pHidd_Gfx_Co
     return;
 }
 
-OOP_Object *SDLGfx__Hidd_Gfx__Show(OOP_Class *cl, OOP_Object *o, struct pHidd_Gfx_Show *msg)
+OOP_Object *SDL2Gfx__Hidd_Gfx__Show(OOP_Class *cl, OOP_Object *o, struct pHidd_Gfx_Show *msg)
 {
     struct gfxdata *data = OOP_INST_DATA(cl, o);
     struct pHidd_Gfx_Show mymsg = {msg->mID, msg->bitMap, 0};
@@ -511,25 +496,25 @@ OOP_Object *SDLGfx__Hidd_Gfx__Show(OOP_Class *cl, OOP_Object *o, struct pHidd_Gf
     return (OOP_Object *)OOP_DoSuperMethod(cl, o, (OOP_Msg)&mymsg);
 }
 
-static struct OOP_MethodDescr SDLGfx_Root_descr[] = {
-    {(OOP_MethodFunc)SDLGfx__Root__New    , moRoot_New    },
-    {(OOP_MethodFunc)SDLGfx__Root__Dispose, moRoot_Dispose},
-    {(OOP_MethodFunc)SDLGfx__Root__Get    , moRoot_Get    },
-    {(OOP_MethodFunc)SDLGfx__Root__Set    , moRoot_Set    },
+static struct OOP_MethodDescr SDL2Gfx_Root_descr[] = {
+    {(OOP_MethodFunc)SDL2Gfx__Root__New    , moRoot_New    },
+    {(OOP_MethodFunc)SDL2Gfx__Root__Dispose, moRoot_Dispose},
+    {(OOP_MethodFunc)SDL2Gfx__Root__Get    , moRoot_Get    },
+    {(OOP_MethodFunc)SDL2Gfx__Root__Set    , moRoot_Set    },
     {NULL                                 , 0             }
 };
-#define NUM_SDLGfx_Root_METHODS 4
+#define NUM_SDL2Gfx_Root_METHODS 4
 
-static struct OOP_MethodDescr SDLGfx_Hidd_Gfx_descr[] = {
-    {(OOP_MethodFunc)SDLGfx__Hidd_Gfx__CreateObject, moHidd_Gfx_CreateObject},
-    {(OOP_MethodFunc)SDLGfx__Hidd_Gfx__Show, moHidd_Gfx_Show},
-    {(OOP_MethodFunc)SDLGfx__Hidd_Gfx__CopyBox, moHidd_Gfx_CopyBox},
+static struct OOP_MethodDescr SDL2Gfx_Hidd_Gfx_descr[] = {
+    {(OOP_MethodFunc)SDL2Gfx__Hidd_Gfx__CreateObject, moHidd_Gfx_CreateObject},
+    {(OOP_MethodFunc)SDL2Gfx__Hidd_Gfx__Show, moHidd_Gfx_Show},
+    {(OOP_MethodFunc)SDL2Gfx__Hidd_Gfx__CopyBox, moHidd_Gfx_CopyBox},
     {NULL, 0}
 };
-#define NUM_SDLGfx_Hidd_Gfx_METHODS 3
+#define NUM_SDL2Gfx_Hidd_Gfx_METHODS 3
 
-struct OOP_InterfaceDescr SDLGfx_ifdescr[] = {
-    {SDLGfx_Root_descr    , IID_Root    , NUM_SDLGfx_Root_METHODS    },
-    {SDLGfx_Hidd_Gfx_descr, IID_Hidd_Gfx, NUM_SDLGfx_Hidd_Gfx_METHODS},
+struct OOP_InterfaceDescr SDL2Gfx_ifdescr[] = {
+    {SDL2Gfx_Root_descr    , IID_Root    , NUM_SDL2Gfx_Root_METHODS    },
+    {SDL2Gfx_Hidd_Gfx_descr, IID_Hidd_Gfx, NUM_SDL2Gfx_Hidd_Gfx_METHODS},
     {NULL                 , NULL                                     }
 };

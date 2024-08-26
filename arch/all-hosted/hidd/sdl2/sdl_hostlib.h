@@ -25,10 +25,10 @@ struct sdl_funcs
     char * (*SDL_VideoDriverName) (char *namebuf, int maxlen);
     SDL_Surface * (*SDL_GetVideoSurface) (void);
     int (*SDL_GetCurrentDisplayMode) (int displayIndex, SDL_DisplayMode *mode);
+    int (*SDL_GetDisplayMode) (int displayIndex, int modeIndex, SDL_DisplayMode *mode);
+    int (*SDL_GetNumDisplayModes) (int displayIndex);
     SDL_PixelFormat * (*SDL_AllocFormat) (Uint32 format);
     void (*SDL_FreeFormat) (SDL_PixelFormat *);
-    SDL_Rect ** (*SDL_ListModes) (SDL_PixelFormat *format, Uint32 flags);
-    SDL_Surface * (*SDL_SetVideoMode) (int width, int height, int bpp, Uint32 flags);
     void (*SDL_UpdateRect) (SDL_Surface *screen, Sint32 x, Sint32 y, Uint32 w, Uint32 h);
     int (*SDL_SetColors) (SDL_Surface *surface, SDL_Color *colors, int firstcolor, int ncolors);
     SDL_Surface * (*SDL_CreateRGBSurface) (Uint32 flags, int width, int height, int depth, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask);
