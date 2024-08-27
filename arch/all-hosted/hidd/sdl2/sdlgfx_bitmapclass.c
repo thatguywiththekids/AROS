@@ -81,11 +81,11 @@ OOP_Object *SDLBitMap__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New 
     SDL_Surface *s;
     IPTR red_mask, green_mask, blue_mask, alpha_mask;
 
-    D(bug("[sdl] SDLBitMap::New\n"));
+    D(bug("[sdl2] SDLBitMap::New\n"));
 
     o = (OOP_Object *) OOP_DoSuperMethod(cl, o, (OOP_Msg) msg);
     if (o == NULL) {
-        D(bug("[sdl] supermethod failed, bailing out\n"));
+        D(bug("[sdl2] supermethod failed, bailing out\n"));
         return NULL;
     }
 
@@ -97,11 +97,11 @@ OOP_Object *SDLBitMap__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New 
 
     OOP_GetAttr(pixfmt, aHidd_PixFmt_Depth, &depth);
 
-    D(bug("[sdl] width %d height %d depth %d\n", width, height, depth));
+    D(bug("[sdl2] width %d height %d depth %d\n", width, height, depth));
 
     framebuffer  = GetTagData(aHidd_BitMap_FrameBuffer, FALSE, msg->attrList);
     if (framebuffer) {
-        D(bug("[sdl] creating new framebuffer\n"));
+        D(bug("[sdl2] creating new framebuffer\n"));
 
         /* XXX we should free any existing onscreen surface. the problem is
          * that we can't dispose the existing framebuffer object because the
@@ -116,10 +116,10 @@ OOP_Object *SDLBitMap__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New 
          */
 
         if (!LIBBASE->use_hwsurface)
-            D(bug("[sdl] hardware surface not available, using software surface instead\n"));
+            D(bug("[sdl2] hardware surface not available, using software surface instead\n"));
 
         if (LIBBASE->icon == NULL) {
-            D(bug("[sdl] loading window icon\n"));
+            D(bug("[sdl2] loading window icon\n"));
             load_icon((LIBBASETYPEPTR) cl->UserData);
         }
 
@@ -140,7 +140,7 @@ OOP_Object *SDLBitMap__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New 
         OOP_GetAttr(pixfmt, aHidd_PixFmt_BlueMask,  &blue_mask);
         OOP_GetAttr(pixfmt, aHidd_PixFmt_AlphaMask, &alpha_mask);
 
-        D(bug("[sdl] creating new offscreen surface; masks: red 0x%08x green 0x%08x blue 0x%08x alpha 0x%08x\n", red_mask, green_mask, blue_mask, alpha_mask));
+        D(bug("[sdl2] creating new offscreen surface; masks: red 0x%08x green 0x%08x blue 0x%08x alpha 0x%08x\n", red_mask, green_mask, blue_mask, alpha_mask));
 
         s = SP(SDL_CreateRGBSurface, SDL_SWSURFACE, width, height, depth, red_mask, green_mask, blue_mask, alpha_mask);
     }
@@ -148,7 +148,7 @@ OOP_Object *SDLBitMap__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New 
     if (s == NULL) {
         OOP_MethodID dispose;
 
-        D(bug("[sdl] failed to create surface: %s\n", S(SDL_GetError, )));
+        D(bug("[sdl2] failed to create surface: %s\n", S(SDL_GetError, )));
 
         dispose = OOP_GetMethodID(IID_Root, moRoot_Dispose);
         OOP_CoerceMethod(cl, o, (OOP_Msg) &dispose);
@@ -161,7 +161,7 @@ OOP_Object *SDLBitMap__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New 
     if (framebuffer)
         bmdata->is_onscreen = TRUE;
 
-    D(bug("[sdl] created surface: 0x%08x\n", s));
+    D(bug("[sdl2] created surface: 0x%08x\n", s));
 
     return o;
 }
@@ -169,10 +169,10 @@ OOP_Object *SDLBitMap__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New 
 VOID SDLBitMap__Root__Dispose(OOP_Class *cl, OOP_Object *o, OOP_Msg msg) {
     struct bmdata *bmdata = OOP_INST_DATA(cl, o);
 
-    D(bug("[sdl] SDLBitMap::Dispose\n"));
+    D(bug("[sdl2] SDLBitMap::Dispose\n"));
 
     if (bmdata->surface != NULL) {
-        D(bug("[sdl] destroying surface 0x%08x\n", bmdata->surface));
+        D(bug("[sdl2] destroying surface 0x%08x\n", bmdata->surface));
 
         SV(SDL_FreeSurface, bmdata->surface);
         bmdata->surface = NULL;
@@ -186,7 +186,7 @@ VOID SDLBitMap__Root__Dispose(OOP_Class *cl, OOP_Object *o, OOP_Msg msg) {
 VOID SDLBitMap__Root__Get(OOP_Class *cl, OOP_Object *o, struct pRoot_Get *msg) {
     struct bmdata *bmdata = OOP_INST_DATA(cl, o);
 
-//    D(bug("[sdl] SDLBitMap::Get\n"));
+//    D(bug("[sdl2] SDLBitMap::Get\n"));
 
     switch (SDLBM_ATTR(msg->attrID)) {
         case aoHidd_SDLBitMap_Surface:
@@ -226,7 +226,7 @@ BOOL SDLBitMap__Hidd_BitMap__SetColors(OOP_Class *cl, OOP_Object *o, struct pHid
     SDL_Color *colors;
     int i;
 
-    //D(bug("[sdl] SDLBitMap::SetColors\n"));
+    //D(bug("[sdl2] SDLBitMap::SetColors\n"));
 
     pixfmt = BM_PIXFMT(o);
     if (HIDD_PF_COLMODEL(pixfmt) == vHidd_ColorModel_StaticPalette ||
@@ -248,7 +248,7 @@ BOOL SDLBitMap__Hidd_BitMap__SetColors(OOP_Class *cl, OOP_Object *o, struct pHid
 
     S(SDL_SetColors, bmdata->surface, colors, msg->firstColor, msg->numColors);
 
-    D(bug("[sdl] set %d colours for surface 0x%08x\n", msg->numColors, bmdata->surface));
+    D(bug("[sdl2] set %d colours for surface 0x%08x\n", msg->numColors, bmdata->surface));
 
     return TRUE;
 }
@@ -286,8 +286,8 @@ VOID SDLBitMap__Hidd_BitMap__PutPixel(OOP_Class *cl, OOP_Object *o, struct pHidd
     Uint8 *p = (Uint8 *) bmdata->surface->pixels + msg->y * bmdata->surface->pitch + msg->x * bytesperpixel;
     Uint32 c = msg->pixel;
 
-    //D(bug("[sdl] SDLBitMap::PutPixel\n"));
-    //D(bug("[sdl] x %d y %d colour 0x%08x bytesperpixel %d\n", msg->x, msg->y, c, bytesperpixel));
+    //D(bug("[sdl2] SDLBitMap::PutPixel\n"));
+    //D(bug("[sdl2] x %d y %d colour 0x%08x bytesperpixel %d\n", msg->x, msg->y, c, bytesperpixel));
     
     LOCK(bmdata->surface);
 
@@ -318,8 +318,8 @@ HIDDT_Pixel SDLBitMap__Hidd_BitMap__GetPixel(OOP_Class *cl, OOP_Object *o, struc
     Uint8 *p = (Uint8 *) bmdata->surface->pixels + msg->y * bmdata->surface->pitch + msg->x * bytesperpixel;
     Uint32 c = 0;
 
-    //D(bug("[sdl] SDLBitMap::GetPixel\n"));
-    //D(bug("[sdl] x %d y %d bytesperpixel %d\n", msg->x, msg->y, bytesperpixel));
+    //D(bug("[sdl2] SDLBitMap::GetPixel\n"));
+    //D(bug("[sdl2] x %d y %d bytesperpixel %d\n", msg->x, msg->y, bytesperpixel));
 
     LOCK(bmdata->surface);
 
@@ -344,7 +344,7 @@ HIDDT_Pixel SDLBitMap__Hidd_BitMap__GetPixel(OOP_Class *cl, OOP_Object *o, struc
 
     UNLOCK(bmdata->surface);
 
-    //D(bug("[sdl] returning pixel 0x%08x\n", c));
+    //D(bug("[sdl2] returning pixel 0x%08x\n", c));
     
     return (HIDDT_Pixel) c;
 }
@@ -352,8 +352,8 @@ HIDDT_Pixel SDLBitMap__Hidd_BitMap__GetPixel(OOP_Class *cl, OOP_Object *o, struc
 VOID SDLBitMap__Hidd_BitMap__UpdateRect(OOP_Class *cl, OOP_Object *o, struct pHidd_BitMap_UpdateRect *msg) {
     struct bmdata *bmdata = OOP_INST_DATA(cl, o);
 
-    D(bug("[sdl] SDLBitMap::UpdateRect\n"));
-    D(bug("[sdl] Updating region (%d,%d) [%d,%d]\n", msg->x, msg->y, msg->width, msg->height));
+    D(bug("[sdl2] SDLBitMap::UpdateRect\n"));
+    D(bug("[sdl2] Updating region (%d,%d) [%d,%d]\n", msg->x, msg->y, msg->width, msg->height));
 
     if (bmdata->is_onscreen)
         SV(SDL_UpdateRect, bmdata->surface, msg->x, msg->y, msg->width, msg->height);
@@ -367,15 +367,15 @@ VOID SDLBitMap__Hidd_BitMap__PutImage(OOP_Class *cl, OOP_Object *o, struct pHidd
     SDL_Surface *s;
     SDL_Rect srect, drect;
 
-    DPUTIMAGE(bug("[sdl] SDLBitMap::PutImage\n"));
+    DPUTIMAGE(bug("[sdl2] SDLBitMap::PutImage\n"));
 
     switch (msg->pixFmt) {
         case vHidd_StdPixFmt_Native32:
-            DPUTIMAGE(bug("[sdl] native32 format, making a note to ensure 4-byte pixels later\n"));
+            DPUTIMAGE(bug("[sdl2] native32 format, making a note to ensure 4-byte pixels later\n"));
             native32 = TRUE;
 
         case vHidd_StdPixFmt_Native:
-            DPUTIMAGE(bug("[sdl] native format, using our attributes\n"));
+            DPUTIMAGE(bug("[sdl2] native format, using our attributes\n"));
 
             depth      = bmdata->surface->format->BitsPerPixel;
             red_mask   = bmdata->surface->format->Rmask;
@@ -386,7 +386,7 @@ VOID SDLBitMap__Hidd_BitMap__PutImage(OOP_Class *cl, OOP_Object *o, struct pHidd
             break;
 
         default:
-            DPUTIMAGE(bug("[sdl] pixel format %d, asking the gfxhidd for attributes\n", msg->pixFmt));
+            DPUTIMAGE(bug("[sdl2] pixel format %d, asking the gfxhidd for attributes\n", msg->pixFmt));
 
             OOP_Object *gfxhidd;
             OOP_GetAttr(o, aHidd_BitMap_GfxHidd, (IPTR *)&gfxhidd);
@@ -407,11 +407,11 @@ VOID SDLBitMap__Hidd_BitMap__PutImage(OOP_Class *cl, OOP_Object *o, struct pHidd
             break;
     }
 
-    DPUTIMAGE(bug("[sdl] source format: depth %d red 0x%08x green 0x%08x blue 0x%08x alpha 0x%08x\n", depth, red_mask, green_mask, blue_mask, alpha_mask));
+    DPUTIMAGE(bug("[sdl2] source format: depth %d red 0x%08x green 0x%08x blue 0x%08x alpha 0x%08x\n", depth, red_mask, green_mask, blue_mask, alpha_mask));
 
     s = SP(SDL_CreateRGBSurfaceFrom, msg->pixels, msg->width, msg->height, depth, msg->modulo, red_mask, green_mask, blue_mask, alpha_mask);
     if (native32) {
-        DPUTIMAGE(bug("[sdl] native32 format, setting pixel width to 4 bytes\n"));
+        DPUTIMAGE(bug("[sdl2] native32 format, setting pixel width to 4 bytes\n"));
         s->format->BytesPerPixel = 4;
     }
 
@@ -423,7 +423,7 @@ VOID SDLBitMap__Hidd_BitMap__PutImage(OOP_Class *cl, OOP_Object *o, struct pHidd
     drect.x = msg->x;
     drect.y = msg->y;
 
-    DPUTIMAGE(bug("[sdl] blitting %dx%d image to surface 0x%08x at [%d,%d]\n", srect.w, srect.h, bmdata->surface, drect.x, drect.y));
+    DPUTIMAGE(bug("[sdl2] blitting %dx%d image to surface 0x%08x at [%d,%d]\n", srect.w, srect.h, bmdata->surface, drect.x, drect.y));
 
     S(SDL_BlitSurface, s, &srect, bmdata->surface, &drect);
 
@@ -438,15 +438,15 @@ VOID SDLBitMap__Hidd_BitMap__GetImage(OOP_Class *cl, OOP_Object *o, struct pHidd
     SDL_Surface *s;
     SDL_Rect srect;
 
-    D(bug("[sdl] SDLBitMap::GetImage\n"));
+    D(bug("[sdl2] SDLBitMap::GetImage\n"));
 
     switch (msg->pixFmt) {
         case vHidd_StdPixFmt_Native32:
-            D(bug("[sdl] native32 format, making a note to ensure 4-byte pixels later\n"));
+            D(bug("[sdl2] native32 format, making a note to ensure 4-byte pixels later\n"));
             native32 = TRUE;
 
         case vHidd_StdPixFmt_Native:
-            D(bug("[sdl] native format, using our attributes\n"));
+            D(bug("[sdl2] native format, using our attributes\n"));
 
             depth      = bmdata->surface->format->BitsPerPixel;
             red_mask   = bmdata->surface->format->Rmask;
@@ -457,7 +457,7 @@ VOID SDLBitMap__Hidd_BitMap__GetImage(OOP_Class *cl, OOP_Object *o, struct pHidd
             break;
 
         default:
-            D(bug("[sdl] pixel format %d, asking the gfxhidd for attributes\n", msg->pixFmt));
+            D(bug("[sdl2] pixel format %d, asking the gfxhidd for attributes\n", msg->pixFmt));
 
             OOP_Object *gfxhidd;
             OOP_GetAttr(o, aHidd_BitMap_GfxHidd, (IPTR *)&gfxhidd);
@@ -473,11 +473,11 @@ VOID SDLBitMap__Hidd_BitMap__GetImage(OOP_Class *cl, OOP_Object *o, struct pHidd
             break;
     }
 
-    D(bug("[sdl] target format: depth %d red 0x%08x green 0x%08x blue 0x%08x alpha 0x%08x\n", depth, red_mask, green_mask, blue_mask, alpha_mask));
+    D(bug("[sdl2] target format: depth %d red 0x%08x green 0x%08x blue 0x%08x alpha 0x%08x\n", depth, red_mask, green_mask, blue_mask, alpha_mask));
 
     s = SP(SDL_CreateRGBSurfaceFrom, msg->pixels, msg->width, msg->height, depth, msg->modulo, red_mask, green_mask, blue_mask, alpha_mask);
     if (native32) {
-        D(bug("[sdl] native32 format, setting pixel width to 4 bytes\n"));
+        D(bug("[sdl2] native32 format, setting pixel width to 4 bytes\n"));
         s->format->BytesPerPixel = 4;
     }
 
@@ -486,7 +486,7 @@ VOID SDLBitMap__Hidd_BitMap__GetImage(OOP_Class *cl, OOP_Object *o, struct pHidd
     srect.w = msg->width;
     srect.h = msg->height;
 
-    D(bug("[sdl] blitting %dx%d image at [%d,%d] to surface 0x%08x\n", srect.w, srect.h, srect.x, srect.y, bmdata->surface));
+    D(bug("[sdl2] blitting %dx%d image at [%d,%d] to surface 0x%08x\n", srect.w, srect.h, srect.x, srect.y, bmdata->surface));
 
     S(SDL_BlitSurface, bmdata->surface, &srect, s, NULL);
 
@@ -500,16 +500,16 @@ VOID SDLBitMap__Hidd_BitMap__FillRect(OOP_Class *cl, OOP_Object *o, struct pHidd
     HIDDT_Pixel fg = GC_FG(msg->gc);
     HIDDT_DrawMode mode = GC_DRMD(msg->gc);
 
-    D(bug("[sdl] SDLBitMap::FillRect\n"));
+    D(bug("[sdl2] SDLBitMap::FillRect\n"));
 
     rect.x = msg->minX;
     rect.y = msg->minY;
     rect.w = msg->maxX - msg->minX + 1;
     rect.h = msg->maxY - msg->minY + 1;
 
-    D(bug("[sdl] target surface 0x%08x, width %d, height %d, depth %d\n", bmdata->surface, bmdata->surface->w, bmdata->surface->h, bmdata->surface->format->BitsPerPixel));
-    D(bug("[sdl] target rect x %d y %d w %d h %d\n", rect.x, rect.y, rect.h, rect.y));
-    D(bug("[sdl] colour 0x%08x, mode %d\n", fg, mode));
+    D(bug("[sdl2] target surface 0x%08x, width %d, height %d, depth %d\n", bmdata->surface, bmdata->surface->w, bmdata->surface->h, bmdata->surface->format->BitsPerPixel));
+    D(bug("[sdl2] target rect x %d y %d w %d h %d\n", rect.x, rect.y, rect.h, rect.y));
+    D(bug("[sdl2] colour 0x%08x, mode %d\n", fg, mode));
 
     switch(mode) {
         case vHidd_GC_DrawMode_Copy:
@@ -543,11 +543,11 @@ VOID SDLBitMap__Hidd_BitMap__Clear(OOP_Class *cl, OOP_Object *o, struct pHidd_Bi
     struct bmdata *bmdata = OOP_INST_DATA(cl, o);
     Uint32 c;
 
-    D(bug("[sdl] SDLBitMap::Clear\n"));
+    D(bug("[sdl2] SDLBitMap::Clear\n"));
 
     c = GC_BG(msg->gc);
 
-    D(bug("[sdl] filling surface 0x%08x with colour 0x%08x\n", bmdata->surface, c));
+    D(bug("[sdl2] filling surface 0x%08x with colour 0x%08x\n", bmdata->surface, c));
 
     S(SDL_FillRect, bmdata->surface, NULL, c);
 }
@@ -561,9 +561,9 @@ VOID SDLBitMap__Hidd_BitMap__BlitColorExpansion(OOP_Class *cl, OOP_Object *o, st
     ULONG ce;
     ULONG *srcline;
     
-    D(bug("[sdl] SDLBitMap::BlitColorExpansion\n"));
+    D(bug("[sdl2] SDLBitMap::BlitColorExpansion\n"));
 
-    D(bug("[sdl] target surface 0x%08x rect x %d y %d w %d h %d\n", bmdata->surface, msg->destX, msg->destY, msg->width, msg->height));
+    D(bug("[sdl2] target surface 0x%08x rect x %d y %d w %d h %d\n", bmdata->surface, msg->destX, msg->destY, msg->width, msg->height));
 
     fg = GC_FG(msg->gc);
     bg = GC_BG(msg->gc);
@@ -576,7 +576,7 @@ VOID SDLBitMap__Hidd_BitMap__BlitColorExpansion(OOP_Class *cl, OOP_Object *o, st
     switch (ce) {
 
         case vHidd_GC_ColExp_Transparent:
-            D(bug("[sdl] transparent colour expansion, fg 0x%08x\n", fg));
+            D(bug("[sdl2] transparent colour expansion, fg 0x%08x\n", fg));
 
             switch (bytesperpixel) {
 
@@ -629,7 +629,7 @@ VOID SDLBitMap__Hidd_BitMap__BlitColorExpansion(OOP_Class *cl, OOP_Object *o, st
 
 
         case vHidd_GC_ColExp_Opaque:
-            D(bug("[sdl] opaque colour expansion, fg 0x%08x bg %08x\n", fg, bg));
+            D(bug("[sdl2] opaque colour expansion, fg 0x%08x bg %08x\n", fg, bg));
 
             switch (bytesperpixel) {
 
@@ -683,7 +683,7 @@ VOID SDLBitMap__Hidd_BitMap__PutAlphaImage(OOP_Class *cl, OOP_Object *o, struct 
     SDL_Surface *s;
     SDL_Rect srect, drect;
 
-    D(bug("[sdl] SDLBitMap::PutAlphaImage\n"));
+    D(bug("[sdl2] SDLBitMap::PutAlphaImage\n"));
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     s = SP(SDL_CreateRGBSurfaceFrom, msg->pixels, msg->width, msg->height, 32, msg->modulo, 0xff0000, 0xff00, 0xff, 0xff000000);
@@ -699,7 +699,7 @@ VOID SDLBitMap__Hidd_BitMap__PutAlphaImage(OOP_Class *cl, OOP_Object *o, struct 
     drect.x = msg->x;
     drect.y = msg->y;
 
-    D(bug("[sdl] blitting %dx%d alpha image to surface 0x%08x at [%d,%d]\n", srect.w, srect.h, bmdata->surface, drect.x, drect.y));
+    D(bug("[sdl2] blitting %dx%d alpha image to surface 0x%08x at [%d,%d]\n", srect.w, srect.h, bmdata->surface, drect.x, drect.y));
 
     S(SDL_BlitSurface, s, &srect, bmdata->surface, &drect);
 
@@ -709,7 +709,7 @@ VOID SDLBitMap__Hidd_BitMap__PutAlphaImage(OOP_Class *cl, OOP_Object *o, struct 
 VOID SDLBitMap__Hidd_BitMap__PutTemplate(OOP_Class *cl, OOP_Object *o, struct pHidd_BitMap_PutTemplate *msg) {
     struct bmdata *bmdata = OOP_INST_DATA(cl, o);
 
-    D(bug("[sdl] SDLBitMap::PutTemplate\n"));
+    D(bug("[sdl2] SDLBitMap::PutTemplate\n"));
 
     LOCK(bmdata->surface);
 
