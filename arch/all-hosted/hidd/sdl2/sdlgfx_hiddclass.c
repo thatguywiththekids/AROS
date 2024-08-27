@@ -53,15 +53,15 @@ OOP_Object *SDL2Gfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *m
 #endif
     error = S(SDL_GetCurrentDisplayMode, 0, &current_mode);
     if (error) {
-        bug("[sdl] Failed to get the current display mode.\n");
+        bug("[sdl2] Failed to get the current display mode.\n");
         return NULL;
     }
     pixfmt = SP(SDL_AllocFormat, current_mode.format);
 
-    D(bug("[sdl] colour model: %s\n", pixfmt->palette == NULL ? "truecolour" : "palette"));
+    D(bug("[sdl2] colour model: %s\n", pixfmt->palette == NULL ? "truecolour" : "palette"));
     if (pixfmt->palette == NULL) {
-        D(bug("[sdl] colour mask: alpha=0x%08x red=0x%08x green=0x%08x blue=0x%08x\n", pixfmt->Amask, pixfmt->Rmask, pixfmt->Gmask, pixfmt->Bmask, pixfmt->Amask));
-        D(bug("[sdl] colour shift: alpha=%d red=%d green=%d blue=%d\n", pixfmt->Ashift, pixfmt->Rshift, pixfmt->Gshift, pixfmt->Bshift, pixfmt->Ashift));
+        D(bug("[sdl2] colour mask: alpha=0x%08x red=0x%08x green=0x%08x blue=0x%08x\n", pixfmt->Amask, pixfmt->Rmask, pixfmt->Gmask, pixfmt->Bmask, pixfmt->Amask));
+        D(bug("[sdl2] colour shift: alpha=%d red=%d green=%d blue=%d\n", pixfmt->Ashift, pixfmt->Rshift, pixfmt->Gshift, pixfmt->Bshift, pixfmt->Ashift));
     }
 
     if (pixfmt->palette != NULL) {
@@ -180,7 +180,7 @@ OOP_Object *SDL2Gfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *m
             blue_shift = pixfmt->Bshift;
         }
 
-        D(bug("[sdl] selected pixel format %d\n", stdpixfmt));
+        D(bug("[sdl2] selected pixel format %d\n", stdpixfmt));
 
         pftags = TAGLIST(
             aHidd_PixFmt_ColorModel,    vHidd_ColorModel_TrueColor,
@@ -202,11 +202,11 @@ OOP_Object *SDL2Gfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *m
 
     nmodes = S(SDL_GetNumDisplayModes, 0);
     if (nmodes < 1) {
-        bug("[sdl] no available modes, will not continue\n");
+        bug("[sdl2] no available modes, will not continue\n");
         SV(SDL_FreeFormat, pixfmt);
         return NULL;
     } else {
-        D(bug("[sdl] available modes:"));
+        D(bug("[sdl2] available modes:"));
     
         for (int i = 0; i < nmodes; ++i) {
             SDL_DisplayMode mode;
@@ -220,7 +220,7 @@ OOP_Object *SDL2Gfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *m
         D(bug("\n"));
     }
 
-    D(bug("[sdl] building %d mode sync items\n", nmodes));
+    D(bug("[sdl2] building %d mode sync items\n", nmodes));
 
     tagpool = CreatePool(MEMF_CLEAR, 1024, 128);
 
@@ -271,7 +271,7 @@ OOP_Object *SDL2Gfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *m
     supermsg.mID = msg->mID;
     supermsg.attrList = msgtags;
 
-    D(bug("[sdl] hidd tags built, calling supermethod\n"));
+    D(bug("[sdl2] hidd tags built, calling supermethod\n"));
 
     o = (OOP_Object *) OOP_DoSuperMethod(cl, o, (OOP_Msg) &supermsg);
 
@@ -279,7 +279,7 @@ OOP_Object *SDL2Gfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *m
     SV(SDL_FreeFormat, pixfmt);
 
     if (o == NULL) {
-        D(bug("[sdl] supermethod failed, bailing out\n"));
+        D(bug("[sdl2] supermethod failed, bailing out\n"));
         return NULL;
     }
 
@@ -289,13 +289,9 @@ OOP_Object *SDL2Gfx__Root__New(OOP_Class *cl, OOP_Object *o, struct pRoot_New *m
 VOID SDL2Gfx__Root__Dispose(OOP_Class *cl, OOP_Object *o, OOP_Msg msg) {
     SDL_Surface *s;
 
-    D(bug("[sdl] SDL2Gfx::Dispose\n"));
-    
-    s = SP(SDL_GetVideoSurface);
-    if (s != NULL) {
-        D(bug("[sdl] freeing existing video surface\n"));
-        SV(SDL_FreeSurface, s);
-    }
+    D(bug("[sdl2] SDL2Gfx::Dispose\n"));
+
+    // FIXME: Do something?
 
     OOP_DoSuperMethod(cl, o, msg);
     
@@ -315,7 +311,7 @@ VOID SDL2Gfx__Root__Get(OOP_Class *cl, OOP_Object *o, struct pRoot_Get *msg)
                 return;
 
             case aoHidd_Gfx_DriverName:
-                *msg->storage = (IPTR)"SDL";
+                *msg->storage = (IPTR)"SDL2";
                 return;
         }
     }
@@ -355,16 +351,16 @@ OOP_Object *SDL2Gfx__Hidd_Gfx__CreateObject(OOP_Class *cl, OOP_Object *o, struct
         struct pHidd_Gfx_CreateObject supermsg;
         struct gfxdata *data = OOP_INST_DATA(cl, o);
 
-        D(bug("[sdl] SDL2Gfx::CreateObject, UtilityBase is 0x%p\n", UtilityBase));
+        D(bug("[sdl2] SDL2Gfx::CreateObject, UtilityBase is 0x%p\n", UtilityBase));
 
         if (GetTagData(aHidd_BitMap_ModeID, vHidd_ModeID_Invalid, msg->attrList) != vHidd_ModeID_Invalid) {
-            D(bug("[sdl] bitmap with valid mode, we can handle it\n"));
+            D(bug("[sdl2] bitmap with valid mode, we can handle it\n"));
 
             msgtags = TAGLIST(
                 aHidd_BitMap_ClassPtr, (IPTR) LIBBASE->bmclass,
                 TAG_MORE,              (IPTR) msg->attrList
             );
-            D(bug("[sdl] ClassPtr is 0x%p\n", LIBBASE->bmclass));
+            D(bug("[sdl2] ClassPtr is 0x%p\n", LIBBASE->bmclass));
         } else
             msgtags = msg->attrList;
 
@@ -372,13 +368,10 @@ OOP_Object *SDL2Gfx__Hidd_Gfx__CreateObject(OOP_Class *cl, OOP_Object *o, struct
         supermsg.cl = msg->cl;
         supermsg.attrList = msgtags;
 
-        D(bug("[sdl] Calling DoSuperMethod()\n"));
+        D(bug("[sdl2] Calling DoSuperMethod()\n"));
         object = (OOP_Object *)OOP_DoSuperMethod(cl, o, (OOP_Msg) &supermsg);
 
-        if (GetTagData(aHidd_BitMap_FrameBuffer, FALSE, msg->attrList))
-            data->framebuffer = object;
-
-        D(bug("[sdl] Created bitmap 0x%p\n", object));
+        D(bug("[sdl2] Created bitmap 0x%p\n", object));
     }
     else
         object = (OOP_Object *)OOP_DoSuperMethod(cl, o, (OOP_Msg)msg);
@@ -391,13 +384,13 @@ VOID SDL2Gfx__Hidd_Gfx__CopyBox(OOP_Class *cl, OOP_Object *o, struct pHidd_Gfx_C
     struct SDL_Surface *dest = NULL;
     struct SDL_Rect srect, drect;
 
-    D(bug("[sdl] SDL2Gfx::CopyBox\n"));
+    D(bug("[sdl2] SDL2Gfx::CopyBox\n"));
 
     OOP_GetAttr(msg->src,  aHidd_SDLBitMap_Surface, (IPTR *)&src);
     OOP_GetAttr(msg->dest, aHidd_SDLBitMap_Surface, (IPTR *)&dest);
 
     if (src == NULL || dest == NULL) {
-        D(bug("[sdl] missing a surface: src is 0x%08x, dest is 0x%08x. letting the superclass deal with it\n", src, dest));
+        D(bug("[sdl2] missing a surface: src is 0x%08x, dest is 0x%08x. letting the superclass deal with it\n", src, dest));
 
         OOP_DoSuperMethod(cl, o, (OOP_Msg) msg);
 
@@ -412,7 +405,7 @@ VOID SDL2Gfx__Hidd_Gfx__CopyBox(OOP_Class *cl, OOP_Object *o, struct pHidd_Gfx_C
     drect.x = msg->destX;
     drect.y = msg->destY;
 
-    D(bug("[sdl] blitting %dx%d rect from src 0x%08x [%d,%d] to dest 0x%08x [%d,%d]\n", msg->width, msg->height, src, msg->srcX, msg->srcY, dest, msg->destX, msg->destY));
+    D(bug("[sdl2] blitting %dx%d rect from src 0x%08x [%d,%d] to dest 0x%08x [%d,%d]\n", msg->width, msg->height, src, msg->srcX, msg->srcY, dest, msg->destX, msg->destY));
 
     S(SDL_BlitSurface, src, &srect, dest, &drect);
 
