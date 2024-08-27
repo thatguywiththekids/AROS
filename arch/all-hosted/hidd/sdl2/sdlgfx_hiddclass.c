@@ -347,6 +347,8 @@ OOP_Object *SDL2Gfx__Hidd_Gfx__CreateObject(OOP_Class *cl, OOP_Object *o, struct
 
     if (msg->cl == LIBBASE->basebm)
     {
+        // The object to create is a bitmap
+
         struct TagItem *msgtags;
         struct pHidd_Gfx_CreateObject supermsg;
         struct gfxdata *data = OOP_INST_DATA(cl, o);
@@ -373,8 +375,10 @@ OOP_Object *SDL2Gfx__Hidd_Gfx__CreateObject(OOP_Class *cl, OOP_Object *o, struct
 
         D(bug("[sdl2] Created bitmap 0x%p\n", object));
     }
-    else
+    else {
+        // The object to create is not a bitmap. No special handling needed.
         object = (OOP_Object *)OOP_DoSuperMethod(cl, o, (OOP_Msg)msg);
+    }
 
     return object;
 }
