@@ -1,129 +1,135 @@
 # MetaMake
 
-MetaMake is a version of make which allows to recursively build targets
+MetaMake is a version of make which allows you to recursively build targets
 in the various directories of a project or even another project.
 
-**Shell:** `Usage: mmake [<options>] [<metatargets>]`
+**Usage:**  
+```bash
+mmake [<options>] [<metatargets>]
+```
 
-To build mmake, just compile `mmake.c`. It doesn't need any
-other files.
+To build mmake, just compile `mmake.c`. It doesn't need any other files.
 
-mmake looks for a config file `mmake.config` or
-`.mmake.config` in the current directory for a file in the
-environment variable **Shell:** `$MMAKE_CONFIG} or a file \filename{.mmake.config`
-in the directory **Shell:** `$HOME`.
+mmake looks for a config file `mmake.config` or `.mmake.config` in the current directory,  
+or a file in the environment variable `$MMAKE_CONFIG`,  
+or a file `.mmake.config` in the directory `$HOME`.  
+
 This file can contain the following things:
 
-\begin{description}
-\item{#} This must be the first character in a line and begins a comment.
-Comments are completely ignored my mmake (as are empty lines).
+---
 
-\item{[name]} This begins a config section for the project **Shell:** `name`.
-You can build targets for this project by saying **Shell:** `name.target`.
+### Configuration Options
 
-\item{maketool} Specifies the name of the tool to build a target. The
-default is **Shell:** `make "TOP=$(TOP)" "CURDIR=$(CURDIR)"`
+- **`#`**  
+  This must be the first character in a line and begins a comment.  
+  Comments are completely ignored by mmake (as are empty lines).
 
-\item{top <dir>} Specifies the root directory for a project. You
-will later find this config option in the variable **Shell:** `$(TOP)`.
-The default is the current directory.
+- **`[name]`**  
+  This begins a config section for the project `name`.  
+  You can build targets for this project by saying `name.target`.
 
-\item{defaultmakefilename <filename>} Specifies the basename for
-makefiles in your project. Basename means that mmake will consider
-other files which have this stem and an extension, too. See the
-items to generate makefiles for details. The default
-is `Makefile`
+- **`maketool`**  
+  Specifies the name of the tool to build a target.  
+  Default:  
+  ```bash
+  make "TOP=$(TOP)" "CURDIR=$(CURDIR)"
+  ```
 
-\item{defaulttarget <target>} The name of the default target which
-mmake will try to make if you call it with the name of the
-project alone. The default is **Shell:** `all`.
+- **`top <dir>`**  
+  Specifies the root directory for a project. You will later find this config option in the variable `$(TOP)`.  
+  Default: current directory.
 
-\item{genmakefilescript <cmdline>} mmake will check for files
-with the basename as specified in **Shell:** `defaultmakefilename`
-with the extension **Shell:** `.src`. If such a file is found, the
-following conditions are checked: Whether this file is newer
-than the makefile, whether the makefile doesn't exist and
-whether the file **Shell:** `genmakefiledeps` is newer than the
-makefile. If any of these is true, mmake will call this script
-the the name of the source file as an extra option and the
-stdout of this script will be redirected to **Shell:** `defaultmakefilename`.
-If this is missing, mmake will not try to regenerate makefiles.
+- **`defaultmakefilename <filename>`**  
+  Specifies the basename for makefiles in your project. Basename means that mmake will consider other files which have this stem and an extension, too.  
+  Default: `Makefile`
 
-\item{genmakefiledeps <path>} This is the name of a file which is
-considered when mmake tries to decide whether a makefile must
-be regenerated. Currently, only one such file can be specified.
+- **`defaulttarget <target>`**  
+  The name of the default target which mmake will try to make if you call it with the name of the project alone.  
+  Default: `all`
 
-\item{globalvarfile <path>} This is a file which contains more
-variables in the normal make(1) syntax. mmake doesn't
-know about any special things like line continuation, so
-be careful not to use such variables later (but they
-don't do any harm if they exist in the file. You should
-just not use them anywhere in mmake).
+- **`genmakefilescript <cmdline>`**  
+  mmake will check for files with the basename specified in `defaultmakefilename` with the extension `.src`.  
+  If such a file is found, the following conditions are checked:  
+  - whether this file is newer than the makefile,  
+  - whether the makefile doesn't exist,  
+  - whether the file `genmakefiledeps` is newer than the makefile.  
 
-\item{add <path>} Adds a nonstandard makefile to the list of
-makefiles for this project. mmake will apply the standard
-rules to it as if the **Shell:** `defaultmakefilename` was
-like this filename.
+  If any of these is true, mmake will call this script with the source file as an extra option, and redirect stdout to `defaultmakefilename`.  
+  If missing, mmake will not try to regenerate makefiles.
 
-\item{ignoredir <path>} Will tell mmake to ignore directories
-with this name. Try **Shell:** `ignore CVS` if you use CVS to
-manage your projects' sources.
+- **`genmakefiledeps <path>`**  
+  File used to decide whether a makefile must be regenerated. Only one such file can be specified.
 
-Any option which is not recognised will be added to the list
-of known variables (ie. **Shell:** `foo bar` will create a
-variable **Shell:** `$(foo)} which is expanded to \shell{bar`).
+- **`globalvarfile <path>`**  
+  File which contains more variables in the normal `make(1)` syntax.  
+  mmake doesn’t know about special things like line continuation. Be careful not to use such variables later (but they won’t break mmake if they exist).
 
-Here is an example:
+- **`add <path>`**  
+  Adds a nonstandard makefile to the list of makefiles for this project.  
+  mmake will apply the standard rules to it as if `defaultmakefilename` were this filename.
 
-```
+- **`ignoredir <path>`**  
+  Will tell mmake to ignore directories with this name.  
+  Example: `ignore CVS` if you use CVS.
+
+- **Other options**  
+  Any option not recognized will be added to the list of known variables.  
+  Example: `foo bar` will create a variable `$(foo)` that expands to `bar`.
+
+---
+
+### Example Configuration
+
+```ini
 # This is a comment
-# Options before the first [name] are defaults. Use them for global
-# defaults
+# Options before the first [name] are defaults. Use them for global defaults
 defaultoption value
 
 # Special options for the project name. You can build targets for this
 # project with "mmake name.target"
 [AROS]
-# The root dir of the project. This can be accessed as $(TOP) in every
-# makefile or when you have to specify a path in mmake. The default is
-# the current directory
+# The root dir of the project. The default is the current directory
 top /home/digulla/AROS
-# This is the default name for Makefiles. The default is "Makefile"
+# Default name for Makefiles
 defaultmakefilename makefile
-# If you just say "mmake AROS", then mmake will go for this target
+# Default target when running "mmake AROS"
 defaulttarget AROS
-# mmake allows to generate makefiles with a script. The makefile
-# will be regenerated if it doesn't exist, if the source file is
-# newer or if the file specified with genmakefiledeps is newer.
-# The name of the source file is generated by concatenating
-# defaultmakefilename and ".src"
+# Regenerate makefiles if missing/newer
 genmakefilescript gawk -f $(TOP)/scripts/genmf.gawk --assign "TOP=$(TOP)"
-# If this file is newer than the makefile, the script
-# genmakefilescript will be executed.
 genmakefiledeps $(TOP)/scripts/genmf.gawk
-# mmake will read this file and every variable in this file will
-# be available everywhere where you can use a variable.
+# Read variables from this file
 globalvarfile $(TOP)/config/host.cfg
 
-# Some makefiles must have a different name than
-# defaultmakefilename. You can add them manually here.
+# Some makefiles must have different names:
 #add compiler/include/makefile
 #add makefile
 ```
 
-A metatarget look like so: **Shell:** `project.target`. Example:
-**Shell:** `AROS.setup`. If nothing is specified, mmake will make the default
-target of the first project in the config file. If the project is specified
-but no target, mmake will make the default target of this project.
+---
 
-mmake will look for all makefiles (regenerating them if necessary), check
-which makefiles provide the metatargets you gave in the command line and on
-which other metatargets that depend on those metatargets and will then
-successively make all metatargets.
+### Metatargets
 
-MMake will calculate **Shell:** `$(TOP)` (the path to the top of the project)
-and **Shell:** `CURDIR` (the path to the current directory relative to
-**Shell:** `$(TOP)}) and pass them to make. Also \shell{$(TARGET)` will contain
-the current target but this will not be passed to make automatically. If
-you need the target in the makefile, you can use the **Shell:** `maketool`
-option to change this.
+A metatarget looks like `project.target`.  
+Example: `AROS.setup`.
+
+- If nothing is specified, mmake will make the default target of the first project in the config file.  
+- If only the project is specified (no target), mmake will make the default target of that project.
+
+---
+
+### How mmake Works
+
+mmake will:
+
+1. Look for all makefiles (regenerating them if necessary).  
+2. Check which makefiles provide the metatargets from the command line.  
+3. Resolve dependencies between metatargets.  
+4. Successively make all required metatargets.
+
+mmake calculates and passes the following variables to `make`:
+
+- `$(TOP)` — path to the top of the project  
+- `$(CURDIR)` — path to the current directory relative to `$(TOP)`  
+- `$(TARGET)` — the current target (not passed to `make` automatically)
+
+If you need the target in the makefile, use the `maketool` option to modify how it’s invoked.
