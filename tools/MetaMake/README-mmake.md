@@ -75,7 +75,7 @@ variable **Shell:** `$(foo)} which is expanded to \shell{bar`).
 
 Here is an example:
 
-\begin{example}
+```
 # This is a comment
 # Options before the first [name] are defaults. Use them for global
 # defaults
@@ -109,7 +109,7 @@ globalvarfile $(TOP)/config/host.cfg
 # defaultmakefilename. You can add them manually here.
 #add compiler/include/makefile
 #add makefile
-\end{example}
+```
 
 A metatarget look like so: **Shell:** `project.target`. Example:
 **Shell:** `AROS.setup`. If nothing is specified, mmake will make the default
