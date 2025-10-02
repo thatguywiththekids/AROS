@@ -60,7 +60,11 @@ static char *check_header(struct elfheader *eh)
         eh->ident[2] != 'L'  || eh->ident[3] != 'F')
         return "Not an ELF file";
 
+#ifdef __arm__
     if ((eh->type != ET_REL && eh->type != ET_EXEC) || eh->machine != AROS_ELF_MACHINE)
+#else
+    if (eh->type != ET_REL || eh->machine != AROS_ELF_MACHINE)
+#endif
         return "Object of the wrong type or architecture";
 
     /* No error */
