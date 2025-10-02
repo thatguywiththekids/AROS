@@ -84,7 +84,7 @@ static void *load_hunk(void *file, struct sheader *sh, void *addr, struct Kernel
         return addr;
 
     D(kprintf("[ELF Loader] Chunk (%ld bytes, align=%ld (%p) @ ", sh->size, sh->addralign, (void *)(uintptr_t)sh->addralign);)
-    align = sh->addralign - 1;
+    align = sh->addralign? sh->addralign - 1 : 0;
     addr = (char *)(((uintptr_t)addr + align) & ~align);
 
     D(kprintf("%p\n", addr);)
